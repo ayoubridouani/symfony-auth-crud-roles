@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.bootstrap5.css" type="text/css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.3/css/responsive.bootstrap5.css" type="text/css">
+{% endblock %}
+
+{% block navbar %}
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('products.index') }}">My Products</a>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <h1>Product List</h1>
+    <a href="{{ path('products.create') }}" class="mb-2">Create New Product</a>
+    {# Table #}
+    {#<table class="table table-striped table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Owner</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.price }}</td>
+                <td>{{ product.owner.firstname }} {{ product.owner.lastname }}</td>
+                <td>{{ product.createdAt ? product.createdAt.format('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('products.edit', {id: product.id}) }}">Edit</a>
+                    <form method="post" action="{{ path('products.delete', {id: product.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>#}
+
+    {# Table with Datatable #}
+    <div class="table"></div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-3.7.1.js" type="text/javascript"></script>
+    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.js" type="text/javascript"></script>
+    <script src="https://cdn.datatables.net/2.2.1/js/dataTables.bootstrap5.js" type="text/javascript"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.3/js/dataTables.responsive.js" type="text/javascript"></script>
+    <script src="{{ asset('bundles/datatables/js/datatables.js') }}"></script>
+    <script>
+        $(function() {
+            $('.table').initDataTables({{ datatable_settings(datatable) }}, {
+                "language": {
+                    "sEmptyTable": "No data available in table",
+                    "sInfo": "Showing _START_ to _END_ of _TOTAL_ entries",
+                    "sInfoEmpty": "Showing 0 to 0 of 0 entries",
+                    "sInfoFiltered": "(filtered from _MAX_ total entries)",
+                    "sInfoPostFix": "",
+                    "sInfoThousands": ",",
+                    "sLengthMenu": "Show _MENU_ entries",
+                    "sLoadingRecords": "Loading...",
+                    "sProcessing": "Processing...",
+                    "sSearch": "Search:",
+                    "sZeroRecords": "No matching records found",
+                    "oPaginate": {
+                        "sFirst": "First",
+                        "sLast": "Last",
+                        "sNext": "Next",
+                        "sPrevious": "Previous"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": activate to sort column ascending",
+                        "sSortDescending": ": activate to sort column descending"
+                    }
+                },
+                dom: '<"row"<"col-sm-12 col-lg-6 mb-3 mb-lg-0"l><"col-sm-12 col-lg-6 d-lg-flex justify-content-lg-end"f>>' +
+                     '<"table-responsive"t>' +
+                     '<"row"<"col-sm-12 col-lg-6 mb-3 mb-lg-0"i><"col-sm-12 col-lg-6 d-lg-flex justify-content-lg-end"p>>',
+                responsive: true,
+                searching: true,
+                pagingType: 'simple_numbers',
+                processing: true,
+                serverSide: true,
+                ajax: '{{ path('products.index') }}',
+                columns: [
+                    { data: 'id' },
+                    { data: 'name' },
+                    { data: 'price' },
+                    { data: 'owner' },
+                    { data: 'created_at' },
+                    { data: 'actions' }
+                ],
+                columnDefs: [
+                    { targets: [1, 2, 3, 4], className: 'text-start' },
+                    { targets: [0, -1], className: 'text-center', searchable: false },
+                    { targets: [-1], orderable: false }
+                ]
+            }).then(function(dt) {
+                // dt contains the initialized instance of DataTables
+                dt.on('draw', function() {
+                    //alert('Redrawing table');
+                })
+            });
+        });
+    </script>
+{% endblock %}

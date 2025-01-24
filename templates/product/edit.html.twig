@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block navbar %}
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('products.index') }}">My Products</a>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Edit Post</h1>
+        {{ form_start(form) }}
+
+        {% for field in form %}
+            <div class="form-group">
+                {% if field.vars.name != 'save' and field.vars.name != '_token' %}
+                    <div class="mt-3">{{ form_label(field) }}</div>
+                {% endif %}
+
+                {{ form_widget(field) }}
+
+                {% if field.vars.name != 'save' and field.vars.name != '_token' %}
+                    {% for error in field.vars.errors %}
+                        <div class="error-message">{{ error.message }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

@@ -3,13 +3,17 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`users`')]
+#[Gedmo\SoftDeleteable(fieldName: 'deleted_at', timeAware: false)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
 #[HasLifecycleCallbacks]
@@ -44,6 +48,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'owner')]
+    private ?Collection $products = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
 
@@ -52,6 +59,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deleted_at = null;
+
+    public function __construct()
+    {
+        $this->products = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -195,7 +207,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         //$this->password = null;
     }
 
-    # https://medium.com/@andrii.sukhoi/automatic-values-for-created-at-updated-at-in-doctrine-symfony-6-fb625f17478
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
     {
@@ -207,5 +218,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAtValue(): void
     {
         $this->updated_at = new \DateTimeImmutable();
+    }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): static
+    {
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+            $product->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): static
+    {
+        if ($this->products->removeElement($product)) {
+            // set the owning side to null (unless already changed)
+            if ($product->getOwner() === $this) {
+                $product->setOwner(null);
+            }
+        }
+
+        return $this;
     }
 }

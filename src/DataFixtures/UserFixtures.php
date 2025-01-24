@@ -12,6 +12,7 @@ class UserFixtures extends Fixture
 {
     private UserPasswordHasherInterface $passwordHasher;
     private \Faker\Generator $faker;
+    public const USER_REFERENCE = 'user_reference';
 
     // Constructor: injects the password hasher service and initializes Faker for generating fake data
     public function __construct(UserPasswordHasherInterface $passwordHasher)
@@ -45,6 +46,8 @@ class UserFixtures extends Fixture
 
             // Persist the user entity (prepare it to be saved in the database)
             $manager->persist($user);
+
+            $this->addReference(self::USER_REFERENCE . $i, $user);
         }
 
         // Flush all persisted entities to the database
