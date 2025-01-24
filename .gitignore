@@ -10,3 +10,10 @@
 ###< symfony/framework-bundle ###
 .idea
 Notes
+###> symfony/webpack-encore-bundle ###
+/node_modules/
+/public/build/
+/public/assets
+npm-debug.log
+yarn-error.log
+###< symfony/webpack-encore-bundle ###

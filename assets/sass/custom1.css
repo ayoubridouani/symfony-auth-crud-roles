@@ -1,0 +1,19 @@
+:root {
+    --bs-link-color-rgb: 13, 110, 253;
+}
+
+table form {
+    display: inline;
+}
+
+table form button {
+    border: none;
+    color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
+    text-decoration: underline;
+    background-color: unset;
+    cursor: pointer;
+}
+
+.error-message {
+    color: red;
+}
