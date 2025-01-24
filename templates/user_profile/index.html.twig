@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block body %}
+    {% if app.user %}
+        <h1>Welcome, {{ app.user.firstname }} {{ app.user.lastname }}!</h1>
+        <p>Email: {{ app.user.email }}</p>
+        <p>Username: {{ app.user.username }}</p>
+    {% else %}
+        <p>You are not logged in.</p>
+    {% endif %}
+{% endblock %}
