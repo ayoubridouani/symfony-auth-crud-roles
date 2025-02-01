@@ -22,7 +22,8 @@ In this course you will see:
 - webpack encore
 - fixtures and fakers
 - profiler for debugging
-
+- entity relationships
+- password hashing
 
 # Used Commands:
 - composer require symfony/maker-bundle --dev
