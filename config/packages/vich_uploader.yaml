@@ -11,3 +11,13 @@ vich_uploader:
             uri_prefix: /uploads/images/products/attachments
             upload_destination: '%kernel.project_dir%/public/uploads/images/products/attachments'
             namer: Vich\UploaderBundle\Naming\OrignameNamer
+
+        user_image:
+            uri_prefix: /uploads/images/users/images
+            upload_destination: '%kernel.project_dir%/public/uploads/images/users/images'
+            namer: Vich\UploaderBundle\Naming\OrignameNamer
+
+        user_attachment:
+            uri_prefix: /uploads/images/users/attachments
+            upload_destination: '%kernel.project_dir%/public/uploads/images/users/attachments'
+            namer: Vich\UploaderBundle\Naming\OrignameNamer

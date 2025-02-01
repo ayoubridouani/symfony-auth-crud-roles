@@ -2,10 +2,16 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
+use JetBrains\PhpStorm\NoReturn;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
@@ -47,5 +53,21 @@ class SecurityController extends AbstractController
     {
         // Render the user's profile page template
         return $this->render('user_profile/index.html.twig');
+    }
+
+    #[NoReturn] #[Route(path: '/loginManually', name: 'loginManually')]
+    public function loginManually(Request $request, TokenStorageInterface $tokenStorage, EntityManagerInterface $entityManager): Response {
+        $id = $request->query->get('id', '1');
+
+        $user = $entityManager->getRepository(User::class)->findOneBy(['id' => $id]);
+        if (!$user) {
+            return $this->json(['status' => 'error', 'message' => 'User not found.'], 404);
+        }
+
+        $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+        $tokenStorage->setToken($token);
+
+        // return $this->json(['status' => 'success', 'message' => 'User logged in successfully.']);
+        return $this->redirectToRoute('login');
     }
 }
