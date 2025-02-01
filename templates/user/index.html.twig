@@ -17,7 +17,7 @@
                 <th>Email</th>
                 <th>Username</th>
                 <th>Roles</th>
-                <th>Actions</th>
+                <th class="text-center">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -28,12 +28,14 @@
                 <td>{{ user.email }}</td>
                 <td>{{ user.username }}</td>
                 <td>{{ user.roles | join(', ') }}</td>
-                <td>
+                <td class="text-center">
                     <a href="{{ path('users.edit', {'id': user.id}) }}"> Edit </a>
-                    <form action="{{ path('users.delete', {'id': user.id}) }}" method="post">
-                        <input type="hidden" name="_token" value="{{ csrf_token('user' ~ app.user.id) }}">
-                        <button type="submit"> Delete </button>
-                    </form>
+                    {% if is_granted('ROLE_USER') and not is_granted('ROLE_MANAGER') %}
+                        <form action="{{ path('users.delete', {'id': user.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('user' ~ app.user.id) }}">
+                            <button type="submit"> Delete </button>
+                        </form>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}

@@ -20,8 +20,10 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/products', name: 'products.')]
+#[IsGranted('ROLE_USER')]
 final class ProductController extends AbstractController {
 
     private CsrfTokenManagerInterface $csrfTokenManager;
@@ -32,6 +34,7 @@ final class ProductController extends AbstractController {
     }
 
     #[Route(path: '/', name: 'index')]
+    #[IsGranted('ROLE_USER')]
     public function index(EntityManagerInterface $entityManager, ProductRepository $productRepository, Connection $connection, DataTableFactory $dataTableFactory, Request $request): Response
     {
         //Method 1: Simple Repository Methods
@@ -125,6 +128,11 @@ final class ProductController extends AbstractController {
                     $builder->select('p')
                         ->from(Product::class, 'p')
                         ->orderBy('p.id', 'DESC');
+                    if($this->isGranted('ROLE_USER') && !$this->isGranted('ROLE_MANAGER')) {
+                        $builder->where('p.owner = :owner_id')
+                            ->setParameter('owner_id', $this->getUser()->getId());
+                    }
+                    return $builder;
                 }
             ])
             ->handleRequest($request);
@@ -138,6 +146,7 @@ final class ProductController extends AbstractController {
     }
 
     #[Route(path: '/create', name: 'create', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
     public function create(Request $request, EntityManagerInterface $em): Response
     {
         $post = new Product();
@@ -145,6 +154,9 @@ final class ProductController extends AbstractController {
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            if($this->isGranted('ROLE_USER') && !$this->isGranted('ROLE_MANAGER')) {
+                $post->setOwner($this->getUser()->getId());
+            }
             $em->persist($post);
             $em->flush();
 
@@ -157,12 +169,20 @@ final class ProductController extends AbstractController {
     }
 
     #[Route('/edit/{id}', name: 'edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
     public function edit(Product $post, Request $request, EntityManagerInterface $em): Response
     {
+        if ($this->isGranted('ROLE_USER') && !$this->isGranted('ROLE_MANAGER') && $post->getOwner()->getId() != $this->getUser()->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
         $form = $this->createForm(ProductFormType::class, $post);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            if($this->isGranted('ROLE_USER') && !$this->isGranted('ROLE_MANAGER')) {
+                $post->setOwner($this->getUser()->getId());
+            }
             $em->flush();
 
             return $this->redirectToRoute('products.index');
@@ -174,8 +194,13 @@ final class ProductController extends AbstractController {
     }
 
     #[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function delete(Product $post, EntityManagerInterface $em, Request $request): Response
     {
+        if ($this->isGranted('ROLE_USER') && !$this->isGranted('ROLE_MANAGER') && $post->getOwner()->getId() != $this->getUser()->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
         $token = $request->get('_token');
         if (!$this->csrfTokenManager->isTokenValid(new CsrfToken('delete' . $post->getId(), $token))) {
             return new Response('Invalid CSRF token.', Response::HTTP_FORBIDDEN);

@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Home!
+{% endblock %}
+
+{% block body %}
+    <div>
+        <h1>Hello {{ app.user.firstname }} {{ app.user.lastname }}! </h1>
+        <p>Click <a href="{{ path('profile') }}">here</a> to manage your <b>profile</b>.</p>
+        <p>Click <a href="{{ path('users.index') }}">here</a> to manage <b>users</b>.</p>
+        <p>Click <a href="{{ path('products.index') }}">here</a> to manage <b>products</b>.</p>
+    </div>
+{% endblock %}

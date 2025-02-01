@@ -10,10 +10,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Vich\UploaderBundle\Handler\UploadHandler;
 
 #[Route('/users', name: 'users.')]
+#[IsGranted('ROLE_MANAGER')]
 class UserController extends AbstractController {
     private Security $security;
 
@@ -23,6 +25,7 @@ class UserController extends AbstractController {
     }
 
     #[Route('', name: 'index')]
+    #[IsGranted('ROLE_MANAGER')]
     public function index(Request $request, EntityManagerInterface $em): Response
     {
         //$users = $em->getRepository(User::class)->findAll();
@@ -43,6 +46,7 @@ class UserController extends AbstractController {
     }
 
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function create(Request $request, EntityManagerInterface $em, ValidatorInterface $validator, UploadHandler $uploadHandler): RedirectResponse|Response
     {
         if($request->isMethod(Request::METHOD_POST))
@@ -97,6 +101,7 @@ class UserController extends AbstractController {
     }
 
     #[Route('/edit/{id}', name: 'edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function edit(User $user, Request $request, EntityManagerInterface $em, ValidatorInterface $validator, UploadHandler $uploadHandler): RedirectResponse|Response
     {
         if($request->isMethod(Request::METHOD_POST))
@@ -163,6 +168,7 @@ class UserController extends AbstractController {
     }
 
     #[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(User $user, EntityManagerInterface $em, Request $request): Response
     {
         $token = $request->get('_token');

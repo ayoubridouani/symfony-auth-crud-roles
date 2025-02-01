@@ -22,7 +22,7 @@ class SecurityController extends AbstractController
     {
         // Check if the user is already logged in. If so, redirect them to the 'profile' route.
         if ($this->getUser()) {
-            return $this->redirectToRoute('profile');
+            return $this->redirectToRoute('home');
         }
 
         // Get the last authentication error (if any)
@@ -68,6 +68,6 @@ class SecurityController extends AbstractController
         $tokenStorage->setToken($token);
 
         // return $this->json(['status' => 'success', 'message' => 'User logged in successfully.']);
-        return $this->redirectToRoute('login');
+        return $this->redirectToRoute('home');
     }
 }
